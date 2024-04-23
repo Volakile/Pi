@@ -1,5 +1,5 @@
 
-# Pi-Hole configuration on a BT ISP network.
+# Pi-Hole configuration on a BT network.
 
 **PI SETUP**
 Download Raspbian (choose whether you want desktop or just CLI, I use the CLI):
