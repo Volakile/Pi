@@ -1,3 +1,5 @@
+#Pi-Hole configuration on a BT ISP network.
+
 # Raspberry Pi setup
 Download Raspbian (choose whether you want desktop or just CLI, I use the CLI):
 
@@ -5,21 +7,23 @@ Download Raspbian (choose whether you want desktop or just CLI, I use the CLI):
 
 **Just CLI** - https://downloads.raspberrypi.org/raspbian_lite_latest
 
-**Download Rufus** - https://github.com/pbatard/rufus/releases/download/v3.8/rufus-3.8p.exe
+**Download Imager** - https://www.raspberrypi.com/software/
 
-1) Plug your SD card into your PC
-2) Open Rufus
-    1) Click the drop down box in the 'Device' section and select your SD card
-    2) Click 'SELECT' and browse to your downloaded Raspbian file and select it
-    3) Make sure the right device and image selected, then click 'START'
-    4) Make sure this completes successfully. We now have a bootable PI image. 
+1) Plug your PI SD card into your PC
+2) Open Imager
+    1) Select Your Device
+    2) Select the OS from the list or choose the file you downloaded above
+    3) Select your Storage (the SD card should be here)
+    4) Make sure the right device, image and storage device is selected, then click 'NEXT'
+    5) Select No to wanting OS customisations
 3) Plug this back into your PI
 
 # Getting Prepped
 
-1) Power on your PI and complete any necessary steps to get you logged in.
+1) Power on your PI and complete any necessary steps to get you logged in and connected to a network (ethernet preferred).
 2) If using a desktop version, find how to start the terminal as this will be where you do all your install / config.
-3) Add your own user and give them sudo permissions, run these commands, as is (changing names):
+3) Ensure the OS is up to date by running `sudo apt update %% apt upgrade -y`
+4) Add your own user and give them sudo permissions, run these commands, as is (changing names):
 
 `adduser exampleuser`
 
@@ -54,7 +58,7 @@ If you can't work out how to use VI, do the exactly the following (when in VI):
 
 6) From here I do everything as the root user because I'm lazy. To get into the root user type `sudo su`
 
-6) Configure a static IP address for your Raspberry Pi. I've set this to 192.168.0.250, it's high enough that nothing has probably been assigned it, and it's easy to remember. You can do the same or set something slightly different.
+6) Configure a static IP address for your Raspberry Pi. I've set this to 192.168.1.250, it's high enough that nothing has probably been assigned it, and it's easy to remember. You can do the same or set something slightly different.
 
 `vi /etc/dhcpcd.conf`
 
@@ -62,9 +66,9 @@ Make sure your static IP config looks like so:
 ```
 # Example static IP configuration:
 interface eth0
-static ip_address=192.168.0.250/24
+static ip_address=192.168.1.250/24
 #static ip6_address=fd51:42f8:caae:d92e::ff/64
-static routers=192.168.0.1
+static routers=192.168.1.254
 static domain_name_servers=192.168.0.1 8.8.8.8 fd51:42f8:caae:d92e::1
 ```
 
@@ -85,12 +89,12 @@ option interface_mtu
 require dhcp_server_identifier
 slaac private
 interface eth0
-static ip_address=192.168.0.250/24
-static routers=192.168.0.1
+static ip_address=192.168.1.250/24
+static routers=192.168.1.254
 static domain_name_servers=192.168.0.1 8.8.8.8 fd51:42f8:caae:d92e::1
 interface eth0
-        static ip_address=192.168.0.250/24
-        static routers=192.168.0.1
+        static ip_address=192.168.1.250/24
+        static routers=192.168.1.254
         static domain_name_servers=127.0.0.1
 ```
 
@@ -114,11 +118,9 @@ Lets reset the admin password to something memorable. Run the following in the t
 
 # Getting devices to use the pihole
 
-So now it's installed we need to make sure all network devices are using this for DNS resolution. There are two ways:
+So now it's installed we need to make sure all network devices are using this for DNS resolution. There's only 1 option on BT hubs:
 
-1) On your BT / Virgin router, login to the admin page, click the DHCP settings and see if you can manually set the DNS resolver (you can't on Virgin), if you can, then great, set these to your Pihole's network address and apply the settings. This means that any device that gets an IP from your router will then send all their DNS requests to the pihole to be blocked
-
-2) Setup your pihole as a DHCP server, this means the pihole will handle all requests for new IP addresses, this will then contain the information to set the DNS resolver to the pihole for blocking.
+1) Setup your pihole as a DHCP server, this means the pihole will handle all requests for new IP addresses, this will then contain the information to set the DNS resolver to the pihole for blocking.
 
 ## Configuring the Pihole DHCP server
 
@@ -128,15 +130,15 @@ We need to enable the pihole DHCP server along with disabling the DHCP server on
 2) Click 'Settings'
 3) Click 'DHCP' along the top
 4) Configure the DHCP server
-    1) From `192.168.0.100`
-    2) To `192.168.0.180'
-    3) Router `192.168.0.1`
+    1) From `192.168.1.100`
+    2) To `192.168.1.249'
+    3) Router `192.168.1.254`
 5) Click 'Enable'
 6) DO NOT SAVE YET, WE WILL DO THIS SHORTLY
 
 **Disable DHCP on your router**
-1) Login to your router admin interface, IP is usually 192.168.0.1
-2) Navigate to the DHCP settings - for virgin routers it's under 'Advanced Settings'
+1) Login to your router admin interface, IP is usually 192.168.1.254
+2) Navigate to the DHCP settings - Advanced Settings/My Network/IPv4 configuration/
 3) Disable DHCP server checkbox
 4) Save
 
@@ -152,11 +154,11 @@ If for some reason you have a really shitty lease time on your PC you may lose n
 3) Right click your 'Local area connection' and click 'Properties'
 4) Double click 'Internet Protocol Version 4 (TCP/IPV4)'
 5) Click the 'Use following address' radio button
-    1) IP address `192.168.0.99`
+    1) IP address `192.168.1.99`
     2) Subnet mask `255.255.255.0`
-    3) Default gateway `192.168.0.1`
+    3) Default gateway `192.168.1.254`
     
-You should now be able to navigate to the Pihole IP address (192.168.0.250) in your browser to enable DHCP.
+You should now be able to navigate to the Pihole IP address (192.168.1.250) in your browser to enable DHCP.
 
 Once re-enabled, make sure to remove the static IP config we set previously, just select the 'Obtain IP address automatically' radio button.
 
@@ -164,11 +166,11 @@ Once re-enabled, make sure to remove the static IP config we set previously, jus
 
 By default pihole comes with a few blocklists, we need to bulk this out. We can use some other lists available on the internet.
 
-On the Pihole admin page, navigate to:
-1) Settings
-2) On the top, Blocklists
-3) Remove the ones that are there (you re-add them below)
-4) Copy the below list and paste into the blocklist area, you can do it all in one hit as they're on a new line
+On the Pihole admin page, on the sidebar navigate to:
+1) Domains
+2) Remove the ones that are there (you re-add them below)
+3) Copy the below list and paste into the 'Domain:' box, you can do it all in one hit as they will seperate by a space
+4) Click Add to Blacklist:
 
 ```
 https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
@@ -199,8 +201,7 @@ https://v.firebog.net/hosts/Airelle-trc.txt
 
 You can find some more at - https://firebog.net/
 
-5) Hit 'Save and update' - FYI this will take a little while
-6) That's it, you've got your Pihole all setup!
+5) That's it, you've got your Pihole all setup!
 
 If you want to have your phone routing through the pihole wherever you are, we just need to setup a VPN, tell it to use the pihole and get pihole to monitor the traffic. You can see how to do this below.
 
@@ -208,8 +209,9 @@ If you want to have your phone routing through the pihole wherever you are, we j
 
 We all know advertisers like to change sites and stuff regularly so we can setup some regex blocking to stop these. I've pulled these from the pihole subreddit. Sadly you can't input these all at the same time and need to do it one by one.
 
-1) Navigate to 'Blacklist'
-2) Copy and paste the below, one by one, and click 'Add (regex)' after each one
+1) Navigate to 'Domains'
+2) Click RegEx filter tab
+3) Copy and paste the below in the 'Regular Expression:' box similar to before and click 'Add to Blacklist':
 
 ```
 (^|\.)xn--.*$
@@ -263,9 +265,9 @@ We need to make a few changes so that traffic is directed to the pihole
 1) `vi /etc/openvpn/server.conf`
 2) Make sure the `push "dhcp-option` setting is configured to point to the pihole, it should look like so:
 
-`push "dhcp-option DNS 192.168.0.250"`
+`push "dhcp-option DNS 192.168.1.250"`
 
-3) Remove any other `push "dhcp-option` that do not match `push "dhcp-option DNS 192.168.0.250"` - In vi you can use `dd` to delete a whole line
+3) Remove any other `push "dhcp-option` that do not match `push "dhcp-option DNS 192.168.1.250"` - In vi you can use `dd` to delete a whole line
 
 ## Allowing pihole to monitor VPN traffic
 
@@ -305,7 +307,7 @@ device and create additional profiles for other devices.
 You need to get this off your pi and onto your phone. I used WinSCP - https://winscp.net/download/WinSCP-5.15.4-Portable.zip
 
 1) Open WinSCP
-    1) Hostname (IP of Pi) - 192.168.0.250
+    1) Hostname (IP of Pi) - 192.168.1.250
     2) User (The user we first created) - exampleuser
     3) Password - The password for this user
 2) You will now be in the home directory, if this isn't where the ovpn profile was put you can navigate to where it previously told you.
