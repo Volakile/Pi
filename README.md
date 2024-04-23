@@ -1,6 +1,7 @@
-#Pi-Hole configuration on a BT ISP network.
 
-# Raspberry Pi setup
+# Pi-Hole configuration on a BT ISP network.
+
+**PI SETUP**
 Download Raspbian (choose whether you want desktop or just CLI, I use the CLI):
 
 **Desktop** - https://downloads.raspberrypi.org/raspbian_latest
