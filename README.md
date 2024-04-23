@@ -2,7 +2,7 @@
 # Pi-Hole configuration on a BT network.
 
 **PI SETUP**
-Download Raspbian (choose whether you want desktop or just CLI, I use the CLI):
+Download Raspbian (choose whether you want desktop or just CLI, I used the desktop for other purposes but CLI works fine):
 
 **Desktop** - https://downloads.raspberrypi.org/raspbian_latest
 
@@ -22,9 +22,9 @@ Download Raspbian (choose whether you want desktop or just CLI, I use the CLI):
 # Getting Prepped
 
 1) Power on your PI and complete any necessary steps to get you logged in and connected to a network (ethernet preferred).
-2) If using a desktop version, find how to start the terminal as this will be where you do all your install / config.
+2) If using a desktop version, click the terminal icon in the task bar as this will be where you do all your install / config.
 3) Ensure the OS is up to date by running `sudo apt update %% apt upgrade -y`
-4) Add your own user and give them sudo permissions, run these commands, as is (changing names):
+4) Add your own user and give them sudo permissions, run these commands, as is (changing exampleuser to a username of your choice):
 
 `adduser exampleuser`
 
